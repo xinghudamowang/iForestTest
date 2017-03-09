@@ -51,7 +51,7 @@ print "%d features are selected" % X.shape[1]
 
 ## model training ========================================
 t1= timeit.default_timer()
-clf, ytrain, yscore = iForestTrain_hq(X,r=0.1)
+clf, ytrain, yscore = iForestTrain_hq(X,r=0.051)
 #clf, ytrain, yscore = iForestTrain_hq(X[y==2,:])
 t2 = timeit.default_timer()
 print "Model training time is: %f" % (t2-t1)
