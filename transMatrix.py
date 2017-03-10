@@ -12,13 +12,37 @@ def readFile(filename, cols=None):
     customers = []
     products = []
     money = []
+    dates = []
     for line in fileOb:
         segline = line.split(',')
         customers.append(segline[0])
         products.append(segline[1])
         money.append(float(segline[4]))
+        dates.append(segline[5])
     fileOb.close()
-    return(customers, products, money)
+    return(customers, products, money, dates)
+
+def readSQLdb():
+    import MySQLdb
+    conn= MySQLdb.connect(
+                          host='10.0.0.166',
+                          port = 3306,
+                          user='etlmathes',
+                          passwd='yAUJ4c',
+                          db ='social_behavior',
+                          charset='utf8'
+                          )
+    cur = conn.cursor()
+    #cur.execute("SET NAMES utf8")
+    cur.execute("select opScope from daq_ent_basic_object_local")
+    numR = int(cur.rowcount)
+
+    info = cur.fetchall()
+    print(type(info))
+
+    cur.close()
+    conn.commit()
+    conn.close()
 
 def getOneList(customers, products, prod):
     ## get customer lists

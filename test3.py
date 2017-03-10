@@ -84,8 +84,39 @@ def customerList0(customers, products):
             cusList[unicus.index(customers[i])].append(products[i])
     return(cusList, unicus)  
 
+def filterRdList(rdList, dutime, customers, products, dates, unicus, prods):
+    import datetime
+    import numpy as np
+    strptime, strftime = datetime.datetime.strptime, datetime.datetime.strftime
+    fmat = "%Y-%m-%d"
+    customers = np.array(customers)
+    products = np.array(products)
+    #dates = np.array(dates)
+    targeT = '2017-10-01'
     
+    dropList = [None] * len(rdList)
     
+    for i in range(len(rdList)):
+        for j in range(len(rdList[i])):
+            cus1 = rdList[i][j][0]
+            ind1 = np.where(customers==cus1)
+            ind2 = np.where(products==prods[i])
+            inInd = np.intersect1d(ind1,ind2)
+            if len(inInd)>0:
+                amax = max(inInd)
+                endtime = strftime(strptime(dates[amax], fmat) + datetime.timedelta(dutime[i]), fmat)
+                if strptime(endtime, fmat) > strptime(targeT,fmat):
+                    if (dropList[i]==None):
+                        dropList[i] = [j]
+                    else:
+                        dropList[i].append(j)
+    
+    rdList1 = rdList
+    for k in range(len(rdList)):
+        if not (dropList[k]==None):
+            rdList1[k] = [i for j, i in enumerate(rdList[k]) if j not in dropList[k]]
+        
+    return(rdList1)   
     
 ### test section ==============================================================
 from metrics_classifer import *
@@ -93,10 +124,10 @@ from transMatrix import *
 import numpy as np
 import timeit 
 
-customers, products, money = readFile('test_data2.csv')
+customers, products, money, dates = readFile('test_data2.csv')
 customers = customers[:5000]
 products = products[:5000]
-
+dates = dates[:5000]
 
 t1 = timeit.default_timer()
 transM, prodsList, prods = getTransMatrix0(customers, products)
@@ -114,6 +145,16 @@ print "Escaping time is: %f" % (t3-t2)
 print "Escaping time is: %f" % (t4-t3) 
 print "Escaping time is: %f" % (t5-t4) 
 
-print rdList[0][:10]
+#print rdList[0][1][0] 
 
+## filter by 产品有效截止日
+import random
+n_prod = len(prods)
+dutime = [ii*40 for ii in range(1,n_prod+1)]
+random.shuffle(dutime)
+t5 = timeit.default_timer()
+rdList1 = filterRdList(rdList, dutime, customers, products, dates, unicus, prods)
+## filters by only buying !!!!!!
+t6 = timeit.default_timer()
+print "drop buying Escaping time is: %f" % (t6-t5) 
 
